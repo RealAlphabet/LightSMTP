@@ -15,6 +15,10 @@ void read_mail(smtp_t *server, client_t *client, size_t len)
     act_len = client->body_len;
     new_len =  act_len + len;
 
+    if(client->body_len > 10240000) {
+        send(client->fd, "552 - Message size exceeds", 26, MSG_DONTWAIT);
+        return;
+    }
     // Realloc the buffer if we need to append more data.
     if (client->body_max < new_len) {
         client->body_max = get_next_power(new_len);
