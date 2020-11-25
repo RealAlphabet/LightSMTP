@@ -106,7 +106,7 @@ void *on_smtp_accept(smtp_t *server, int fd, struct sockaddr_in addr)
     client->fd = fd;
 
     // Send welcome message.
-    send(fd, "220 mx.lumzapp.com ESMTP\r\n", 26, MSG_DONTWAIT);
+    send(fd, "220 smtp.lumzapp.com ESMTP\r\n", 28, MSG_DONTWAIT);
 
     // Print debug message.
     puts("[+] Client connected.");

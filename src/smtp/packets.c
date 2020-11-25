@@ -42,7 +42,7 @@ void on_packet_ehlo(smtp_t *server, client_t *client, int argc, char **argv)
     client->state = 1;
 
     // @TODO: Support more extensions and save actual SMTP.
-    send(client->fd, "250-mx.lumzapp.com at your service\r\n250-SIZE 157286400\r\n250-8BITMIME\r\n250-ENHANCEDSTATUSCODES\r\n250 SMTPUTF8\r\n", 109, MSG_DONTWAIT);
+    send(client->fd, "250-smtp.lumzapp.com at your service\r\n250-SIZE 157286400\r\n250-8BITMIME\r\n250-ENHANCEDSTATUSCODES\r\n250 SMTPUTF8\r\n", 111, MSG_DONTWAIT);
 
     // Print debug message.
     puts("[+] Client state = 1 (EHLO)");
