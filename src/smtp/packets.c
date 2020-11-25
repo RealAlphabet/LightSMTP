@@ -36,7 +36,7 @@ int parse_mail(const char *prefix, int len, const char *str, char *dst)
 ///////////////////////////////////
 
 
-void on_packet_ehlo(server_t *server, client_t *client, int argc, char **argv)
+void on_packet_ehlo(smtp_t *server, client_t *client, int argc, char **argv)
 {
     // Update client state.
     client->state = 1;
@@ -48,7 +48,7 @@ void on_packet_ehlo(server_t *server, client_t *client, int argc, char **argv)
     puts("[+] Client state = 1 (EHLO)");
 }
 
-void on_packet_mail(server_t *server, client_t *client, int argc, char **argv)
+void on_packet_mail(smtp_t *server, client_t *client, int argc, char **argv)
 {
     // Verify connection state.
     if (client->state == 0) {
@@ -72,7 +72,7 @@ void on_packet_mail(server_t *server, client_t *client, int argc, char **argv)
     puts("[+] Client state = 2 (MAIL)");
 }
 
-void on_packet_rcpt(server_t *server, client_t *client, int argc, char **argv)
+void on_packet_rcpt(smtp_t *server, client_t *client, int argc, char **argv)
 {
     switch (client->state) {
         case 0:
@@ -100,7 +100,7 @@ void on_packet_rcpt(server_t *server, client_t *client, int argc, char **argv)
     puts("[+] Client state = 3 (RCPT)");
 }
 
-void on_packet_data(server_t *server, client_t *client, int argc, char **argv)
+void on_packet_data(smtp_t *server, client_t *client, int argc, char **argv)
 {
     switch (client->state) {
         case 0:
@@ -126,11 +126,11 @@ void on_packet_data(server_t *server, client_t *client, int argc, char **argv)
     puts("[+] Client state = 4 (DATA)");
 }
 
-void on_packet_quit(server_t *server, client_t *client, int argc, char **argv)
+void on_packet_quit(smtp_t *server, client_t *client, int argc, char **argv)
 {
     // Send quit message.
     send(client->fd, "384 - Good bye !\r\n", 18, MSG_DONTWAIT);
 
     // Close connection.
-    server_close_client(server, client->fd, client);
+    server_close_client((server_t*)server, client->fd, client);
 }

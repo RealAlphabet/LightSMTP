@@ -6,7 +6,7 @@
 ///////////////////////////////////
 
 
-void read_mail(server_t *server, client_t *client, size_t len)
+void read_mail(smtp_t *server, client_t *client, size_t len)
 {
     size_t act_len;
     size_t new_len;
@@ -30,7 +30,6 @@ void read_mail(server_t *server, client_t *client, size_t len)
 
     // Check the end of mail.
     if (strncmp(&client->body[new_len - 5], "\r\n.\r\n", 5) == 0) {
-
         // Send success message.
         send(client->fd, "250 OK\r\n", 8, MSG_DONTWAIT);
 
@@ -38,6 +37,20 @@ void read_mail(server_t *server, client_t *client, size_t len)
         fprintf(stderr, "From:\t%s\n", client->from);
         fprintf(stderr, "To:\t%s\n", client->to);
         fprintf(stderr, "Mail:\n%s", client->body);
+
+        // #
+        mongoc_collection_t *collection = mongoc_client_get_collection(server->client, "lumz-dev", "mails");
+        bson_t *doc = bson_new();
+        bson_error_t error;
+
+        BSON_APPEND_UTF8(doc, "from", client->from);
+        BSON_APPEND_UTF8(doc, "to", client->to);
+        BSON_APPEND_UTF8(doc, "content", client->body);
+
+        mongoc_collection_insert_one(collection, doc, NULL, NULL, &error);
+        mongoc_collection_destroy(collection);
+        bson_destroy(doc);
+        // #
 
         // Free message.
         free(client->body);
@@ -50,7 +63,7 @@ void read_mail(server_t *server, client_t *client, size_t len)
     }
 }
 
-void read_command(server_t *server, client_t *client, size_t len)
+void read_command(smtp_t *server, client_t *client, size_t len)
 {
     char buf[256];
     char *argv[8];
@@ -86,7 +99,7 @@ void read_command(server_t *server, client_t *client, size_t len)
 ///////////////////////////////////
 
 
-void *on_smtp_accept(server_t *server, int fd, struct sockaddr_in addr)
+void *on_smtp_accept(smtp_t *server, int fd, struct sockaddr_in addr)
 {
     client_t *client = calloc(1, sizeof(client_t));
 
@@ -102,7 +115,7 @@ void *on_smtp_accept(server_t *server, int fd, struct sockaddr_in addr)
     return (client);
 }
 
-void on_smtp_close(server_t *server, client_t *client)
+void on_smtp_close(smtp_t *server, client_t *client)
 {
     // Free the body message.
     if (client->body)
@@ -112,11 +125,13 @@ void on_smtp_close(server_t *server, client_t *client)
     free(client);
 
     // Print debug message.
-    puts("[-] Client disconnected.  ");
+    puts("[-] Client disconnected.");
 }
 
-void on_smtp_read(server_t *server, client_t *client, size_t len)
+void on_smtp_read(smtp_t *server, client_t *client, size_t len)
 {
+    fprintf(stderr, "%p\n", server->client);
+
     // The client is currently sending an email.
     if (client->state == 4) {
         read_mail(server, client, len);

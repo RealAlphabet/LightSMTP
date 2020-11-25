@@ -14,10 +14,11 @@ OBJ		=	$(SRC:.c=.o)
 
 NAME	=	lightsmtp
 
-CFLAGS	=	-Wall									\
-			-W										\
-			-Wno-unused-parameter					\
-			-I include								\
+CFLAGS	=	-Wall											\
+			-W												\
+			-Wno-unused-parameter							\
+			-I include										\
+			$$(pkg-config --libs --cflags libmongoc-1.0)	\
 			-g
 
 all:	$(NAME)

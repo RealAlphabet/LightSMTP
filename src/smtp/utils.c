@@ -19,7 +19,7 @@ int split_arguments(char *buf, char **argv, int max)
         word = buf;
 
         // Skip le mot entier.
-        while (*buf && (*buf == ' ' || *buf == '\r' || *buf == '\n') == false)
+        while (*buf && (*buf == ' ' || *buf == '\r' || *buf == '\n') == 0)
             buf++;
 
         // Cas spécial, comptabiliser le dernier argument sans buffer overflow
