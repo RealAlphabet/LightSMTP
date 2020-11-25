@@ -34,9 +34,8 @@ void read_mail(smtp_t *server, client_t *client, size_t len)
         send(client->fd, "250 OK\r\n", 8, MSG_DONTWAIT);
 
         // Show mail in the console.
-        fprintf(stderr, "From:\t%s\n", client->from);
-        fprintf(stderr, "To:\t%s\n", client->to);
-        fprintf(stderr, "Mail:\n%s", client->body);
+        printf("[M]\tFrom:\t%s\n", client->from);
+        printf("\tTo:\t%s\n", client->to);
 
         // #
         mongoc_collection_t *collection = mongoc_client_get_collection(server->client, "lumz-dev", "mails");
@@ -130,8 +129,6 @@ void on_smtp_close(smtp_t *server, client_t *client)
 
 void on_smtp_read(smtp_t *server, client_t *client, size_t len)
 {
-    fprintf(stderr, "%p\n", server->client);
-
     // The client is currently sending an email.
     if (client->state == 4) {
         read_mail(server, client, len);

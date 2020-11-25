@@ -24,19 +24,28 @@ void intHandler() {
 
 int main(int argc ,char **argv)
 {
-    server_t server;
+    smtp_t smtp = { 0 };
+    server_t *server = &smtp.server;
 
     // Catch CTRL + C.
     signal(SIGINT, intHandler);
 
+    // Init MongoDB and database.
+    mongoc_init();
+
+    if ((smtp.client = mongoc_client_new("mongodb://127.0.0.1/?appname=lumz-smtp")) == NULL) {
+        puts("[Error] Unable to connect to the database.");
+        return (1);
+    }
+
     // Register events.
-    server.on_accept = (server_event_accept)on_smtp_accept;
-    server.on_close = (server_event_close)on_smtp_close;
-    server.on_read = (server_event_read)on_smtp_read;
-    server.on_destroy = NULL;
+    server->data = &smtp;
+    server->on_accept = (server_event_accept)on_smtp_accept;
+    server->on_close = (server_event_close)on_smtp_close;
+    server->on_read = (server_event_read)on_smtp_read;
 
     // Bind SMTP port.
-    if (server_bind(&server, "0.0.0.0", 25)) {
+    if (server_bind(server, "0.0.0.0", 25)) {
         puts("[Error] Unable to listen on port 25.");
         return (1);
     }
@@ -45,10 +54,12 @@ int main(int argc ,char **argv)
 
     // Wait for events.
     while (running)
-        server_wait(&server);
+        server_wait(server);
 
     // Close server and free ressources.
-    server_close(&server);
+    server_close(server);
+    mongoc_client_destroy(smtp.client);
+    mongoc_cleanup();
 
     puts("[SMTP] Server closed.");
 
