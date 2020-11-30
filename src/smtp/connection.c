@@ -78,6 +78,8 @@ void read_command(smtp_t *server, client_t *client, size_t len)
     // Set the null terminated string.
     buf[len - 1] = 0;
 
+    fprintf(stderr, "%s\n", buf);
+
     // Split arguments.
     argc = split_arguments(buf, argv, 8);
 
@@ -113,7 +115,8 @@ void *on_smtp_accept(smtp_t *server, int fd, struct sockaddr_in addr)
     send(fd, "220 smtp.lumzapp.com ESMTP\r\n", 28, MSG_DONTWAIT);
 
     // Print debug message.
-    puts("[+] Client connected.");
+    char *ip = inet_ntoa(addr.sin_addr);
+    printf("[+] %s connected.\n", ip);
 
     return (client);
 }
@@ -128,7 +131,7 @@ void on_smtp_close(smtp_t *server, client_t *client)
     free(client);
 
     // Print debug message.
-    puts("[-] Client disconnected.");
+    // puts("[-] Client disconnected.");
 }
 
 void on_smtp_read(smtp_t *server, client_t *client, size_t len)

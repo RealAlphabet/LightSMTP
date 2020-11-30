@@ -30,10 +30,16 @@ int main(int argc ,char **argv)
     // Catch CTRL + C.
     signal(SIGINT, intHandler);
 
+    // Verify parameters.
+    if (argc < 2) {
+        printf("Usage : %s [MongoDB URI]\n", argv[0]);
+        return (1);
+    }
+
     // Init MongoDB and database.
     mongoc_init();
 
-    if ((smtp.client = mongoc_client_new("mongodb://127.0.0.1/?appname=lumz-smtp")) == NULL) {
+    if ((smtp.client = mongoc_client_new(argv[1])) == NULL) {
         puts("[Error] Unable to connect to the database.");
         return (1);
     }

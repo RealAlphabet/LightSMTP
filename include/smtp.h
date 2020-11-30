@@ -17,8 +17,8 @@ typedef struct{
 typedef struct{
     int fd;
     uint8_t state;
-    char from[48];
-    char to[48];
+    char from[128];
+    char to[128];
     char *body;
     size_t body_len;
     size_t body_max;

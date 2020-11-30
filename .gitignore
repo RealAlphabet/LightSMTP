@@ -5,10 +5,8 @@
 !.gitignore
 !*.c
 !*.h
-!*.sh
-
-# Expect Makefile
 !Makefile
+!install.sh
 
 # In subdirectories
 !*/
