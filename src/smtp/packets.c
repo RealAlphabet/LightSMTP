@@ -9,6 +9,7 @@
 
 int parse_mail(const char *prefix, int len, const char *str, char *dst)
 {
+    uint8_t size = 0;
     // Verify argument.
     if (strncmp(prefix, str, len))
         return (1);
@@ -23,7 +24,7 @@ int parse_mail(const char *prefix, int len, const char *str, char *dst)
             break;
 
     // Copy email address to dst.
-    while (*str) {
+    while (*str && size < 127) {
 
         // All is good, we finished reading.
         if (*str == '>') {
@@ -32,6 +33,7 @@ int parse_mail(const char *prefix, int len, const char *str, char *dst)
         }
 
         *dst++ = *str++;
+        size++;
     }
 
     return (1);
