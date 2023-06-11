@@ -37,7 +37,7 @@ int get_next_power(int i)
 {
     int p = 4096;
 
-    while (p < i)
+    while (p <= i)
         p <<= 1;
     return (p);
 }
