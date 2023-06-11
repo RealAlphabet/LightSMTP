@@ -35,6 +35,7 @@ void read_mail(smtp_t *server, client_t *client, size_t len)
 
     // Check the end of mail.
     if (strncmp(&client->body[new_len - 5], "\r\n.\r\n", 5) == 0) {
+
         // Send success message.
         send(client->fd, "250 OK\r\n", 8, MSG_DONTWAIT);
 
@@ -43,7 +44,7 @@ void read_mail(smtp_t *server, client_t *client, size_t len)
         printf("\tTo:\t%s\n", client->to);
 
         // #
-        mongoc_collection_t *collection = mongoc_client_get_collection(server->client, "lumz-dev", "mails");
+        mongoc_collection_t *collection = mongoc_client_get_collection(server->client, "lightsmtp", "mails");
         bson_t *doc = bson_new();
         bson_error_t error;
 
@@ -79,8 +80,6 @@ void read_command(smtp_t *server, client_t *client, size_t len)
     // Set the null terminated string.
     buf[len - 1] = 0;
 
-    fprintf(stderr, "%s\n", buf);
-
     // Split arguments.
     argc = split_arguments(buf, argv, 8);
 
@@ -90,10 +89,13 @@ void read_command(smtp_t *server, client_t *client, size_t len)
 
     // Call the command callback.
     for (int i = 0; COMMANDS[i].name; i++)
-        if (strcmp(COMMANDS[i].name, argv[0]) == 0) {
+        if (strcasecmp(COMMANDS[i].name, argv[0]) == 0) {
             COMMANDS[i].callback(server, client, argc, argv);
             return;
         }
+
+    // Show verbose info.
+    fprintf(stderr, "%s\n", buf);
 
     // The command isn't a valid command.
     send(client->fd, "502 Unrecognized command.\r\n", 27, MSG_DONTWAIT);
@@ -113,7 +115,7 @@ void *on_smtp_accept(smtp_t *server, int fd, struct sockaddr_in addr)
     client->fd = fd;
 
     // Send welcome message.
-    send(fd, "220 smtp.lumzapp.com ESMTP\r\n", 28, MSG_DONTWAIT);
+    send(fd, "220 smtp.shellcode.sh ESMTP\r\n", 29, MSG_DONTWAIT);
 
     // Print debug message.
     char *ip = inet_ntoa(addr.sin_addr);
@@ -132,7 +134,7 @@ void on_smtp_close(smtp_t *server, client_t *client)
     free(client);
 
     // Print debug message.
-    // puts("[-] Client disconnected.");
+    puts("[-] Client disconnected.");
 }
 
 void on_smtp_read(smtp_t *server, client_t *client, size_t len)
